@@ -58,7 +58,7 @@ class VpController extends Controller
     public function update(Request $request, int $id): RedirectResponse
     {
         $vp = $this->vpForMaker($request, $id); abort_if(!in_array($vp->status, ['DRAFT','DIKEMBALIKAN']), 403);
-        $data = $request->validate(['pcs_account_id' => ['nullable','integer','exists:pcs_accounts,id'], 'ref_no' => ['nullable','string','max:255'], 'pay_date' => ['nullable','date'], 'description' => ['required','string','max:5000']]);
+        $data = $request->validate(['kind' => ['required','in:SINGLE,MASS'], 'pcs_account_id' => ['nullable','integer','exists:pcs_accounts,id'], 'ref_no' => ['nullable','string','max:255'], 'pay_date' => ['nullable','date'], 'description' => ['required','string','max:5000']]);
         DB::table('vp')->where('id', $id)->update($data); return back()->with('ok', 'Data VP disimpan.');
     }
     public function addLine(Request $request, int $id): RedirectResponse
@@ -75,6 +75,18 @@ class VpController extends Controller
     public function removeLine(Request $request, int $id, int $lineId): RedirectResponse
     {
         $this->vpForMaker($request, $id); DB::table('vp_lines')->where('id', $lineId)->where('vp_id', $id)->delete(); DB::table('vp')->where('id', $id)->update(['total' => DB::table('vp_lines')->where('vp_id', $id)->sum('amount')]); return back()->with('ok', 'Penerima dihapus.');
+    }
+    public function destroy(Request $request, int $id): RedirectResponse
+    {
+        $vp = $this->vpForMaker($request, $id);
+        abort_if(!in_array($vp->status, ['DRAFT','DIKEMBALIKAN']), 403);
+        DB::transaction(function () use ($id) {
+            DB::table('vp_history')->where('vp_id', $id)->delete();
+            DB::table('vp_lines')->where('vp_id', $id)->delete();
+            DB::table('audit_log')->where('entity', 'vp')->where('entity_id', $id)->delete();
+            DB::table('vp')->where('id', $id)->delete();
+        });
+        return redirect()->route('vp.index')->with('ok', 'Draft VP berhasil dihapus.');
     }
     public function submit(Request $request, int $id): RedirectResponse
     {
