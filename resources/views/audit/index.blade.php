@@ -1,0 +1,6 @@
+@extends('layouts.app')
+@section('content')
+<div class="head"><div class="t"><span class="crumb">Jejak audit</span><h1>Jejak audit aplikasi</h1></div><form method="get" class="actions"><label class="sr" for="q">Cari</label><input id="q" name="q" type="search" value="{{ $query }}" placeholder="Cari pengguna, aktivitas, atau nomor VP" style="width:300px"><button class="btn">Cari</button></form></div>
+<p class="muted" style="margin:0">Waktu dicatat server. Catatan ini hanya bisa ditambah; database menolak perubahan dan penghapusan. Menampilkan 500 catatan terbaru.</p>
+<section class="card flush"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Waktu</th><th>Pengguna</th><th>Aktivitas</th><th>Objek</th><th>Keterangan</th><th>IP</th></tr></thead><tbody>@forelse($rows as $a)<tr><td class="num" style="white-space:nowrap">{{ \Carbon\Carbon::parse($a->at)->timezone('Asia/Jakarta')->format('d M Y, H:i') }}</td><td>{{ $a->username ?: '-' }}</td><td><b>{{ $a->action }}</b></td><td>{{ $a->entity ? ucfirst($a->entity).($a->entity_id ? ' #'.$a->entity_id : '') : '' }}</td><td class="small" style="max-width:360px;overflow-wrap:anywhere">{{ $a->detail }}</td><td class="small muted">{{ $a->ip }}</td></tr>@empty<tr><td colspan="6" class="muted">Belum ada catatan audit.</td></tr>@endforelse</tbody></table></div></section>
+@endsection
