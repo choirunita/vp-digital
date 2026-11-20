@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/vp/{id}/ubah', [VpController::class, 'update'])->middleware('role:maker')->name('vp.update');
     Route::post('/vp/{id}/baris', [VpController::class, 'addLine'])->middleware('role:maker')->name('vp.lines.store');
     Route::post('/vp/{id}/baris/{lineId}/hapus', [VpController::class, 'removeLine'])->middleware('role:maker')->name('vp.lines.destroy');
+    Route::post('/vp/{id}/hapus', [VpController::class, 'destroy'])->middleware('role:maker')->name('vp.destroy');
     Route::post('/vp/{id}/ajukan', [VpController::class, 'submit'])->middleware('role:maker')->name('vp.submit');
     Route::get('/persetujuan', [ApprovalController::class, 'index'])->middleware('role:checker,approver1')->name('approvals.index');
     Route::post('/persetujuan/massal', [ApprovalController::class, 'bulk'])->middleware('role:checker,approver1')->name('approvals.bulk');
